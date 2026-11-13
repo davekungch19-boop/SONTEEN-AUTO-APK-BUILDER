@@ -3,7 +3,7 @@ main = "src/worker.js"
 compatibility_date = "2026-10-01"
 
 [vars]
-GITHUB_OWNER = "YOUR_GITHUB_USERNAME"
+GITHUB_OWNER = "davekungch19-boop"
 GITHUB_REPO = "SONTEEN-AUTO-APK-BUILDER"
 GITHUB_WORKFLOW = "android-build.yml"
 GITHUB_REF = "main"
@@ -16,7 +16,7 @@ bucket_name = "sonteen-apk-builds"
 [[d1_databases]]
 binding = "DB"
 database_name = "sonteen-apk-jobs"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "efcb841e-b451-4f93-962c-a829b8398bdf"
 
 [assets]
 directory = "./public"
