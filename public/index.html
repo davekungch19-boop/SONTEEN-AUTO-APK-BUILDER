@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#160d2b"><title>SONTEEN AUTO APK BUILDER</title>
+<style>
+:root{color-scheme:dark;--bg:#10091e;--panel:#1b1230;--line:#382653;--purple:#a78bfa;--pink:#e879f9;--muted:#b8a9ce}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#452477 0,transparent 50%),var(--bg);color:#f8f4ff;font:15px system-ui, sans-serif;min-height:100vh}
+main{width:min(760px,100%);margin:auto;padding:24px 16px 50px}.brand{display:flex;align-items:center;gap:12px;margin:12px 0 24px}.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#7c3aed,#d946ef);display:grid;place-items:center;font-size:24px;font-weight:900;box-shadow:0 8px 30px #8b5cf655}.brand small{display:block;color:var(--muted);letter-spacing:2px;font-size:10px}.brand h1{font-size:18px;margin:0;letter-spacing:.5px}.pill{margin-left:auto;border:1px solid #28664a;color:#86efac;padding:6px 10px;border-radius:30px;font-size:11px}
+.card{background:#1b1230eF;border:1px solid var(--line);border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 12px 35px #0003}.card h2{font-size:15px;margin:0 0 14px}.muted{color:var(--muted);font-size:13px;line-height:1.6}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}.tab{border:1px solid var(--line);background:#24183b;color:#cbbce0;padding:11px 5px;border-radius:12px;font-size:12px}.tab.active{border-color:var(--purple);background:#38245c;color:white}
+.drop{border:1.5px dashed #7554a7;background:#24183b88;border-radius:16px;padding:26px 14px;text-align:center}.drop strong{display:block;margin:9px 0}.drop input{display:none}.choose{display:inline-block;background:#6d28d9;padding:10px 16px;border-radius:11px;font-weight:700;font-size:13px}
+button{border:0;cursor:pointer;color:white;font:inherit}.primary{width:100%;padding:14px;border-radius:13px;background:linear-gradient(100deg,#7c3aed,#c026d3);font-weight:800;margin-top:14px}.primary:disabled{opacity:.45;cursor:not-allowed}.file{font-size:12px;color:#ddd0f0;margin-top:10px;overflow-wrap:anywhere}
+.status{display:flex;justify-content:space-between;align-items:center;gap:12px}.state{font-size:12px;color:#c4b5fd;background:#352253;padding:6px 10px;border-radius:20px}.bar{height:8px;background:#342746;border-radius:20px;overflow:hidden;margin:14px 0}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8b5cf6,#e879f9);transition:width .3s}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0c0815;border:1px solid #302342;border-radius:12px;padding:13px;min-height:90px;max-height:260px;overflow:auto;color:#c4b5fd;font:12px/1.6 ui-monospace,monospace}.download{display:block;text-align:center;text-decoration:none;background:#166534;padding:13px;border-radius:12px;margin-top:12px;color:white;font-weight:700}.hidden{display:none!important}.warn{border-left:3px solid #fbbf24;padding:8px 10px;background:#f59e0b12;color:#fcd34d;font-size:12px;line-height:1.5;margin-top:12px}
+footer{text-align:center;color:#78688e;font-size:11px;margin-top:24px}
+</style></head>
+<body><main>
+<header class="brand"><div class="logo">S</div><div><small>SONTEEN PROJECTS</small><h1>AUTO APK BUILDER</h1></div><span class="pill">CLOUD BUILD</span></header>
+<section class="card"><h2>01 / SOURCE UPLOAD</h2><div class="muted">เลือกไฟล์โปรเจกต์ Android ที่ต้องการ Build</div>
+<div class="tabs"><button class="tab active" data-mode="project-zip">ZIP</button><button class="tab" data-mode="project-folder">PROJECT</button><button class="tab" data-mode="src-folder">SRC</button></div>
+<div class="drop"><div style="font-size:30px">☁</div><strong id="dropTitle">เลือกไฟล์ ZIP</strong><div class="muted" id="dropDesc">ไฟล์โปรเจกต์ Android .zip</div><label class="choose" for="picker">เลือกไฟล์</label><input id="picker" type="file" accept=".zip"><div class="file" id="fileName">ยังไม่ได้เลือกไฟล์</div></div>
+<div class="warn" id="modeWarn">ZIP ควรมี settings.gradle และไฟล์ app/build.gradle อยู่ภายใน</div>
+<button class="primary" id="buildBtn" disabled>START BUILD</button></section>
+<section class="card"><div class="status"><h2>02 / BUILD STATUS</h2><span class="state" id="state">WAITING</span></div><div class="bar"><i id="progress"></i></div><div class="muted" id="jobInfo">ยังไม่มีงาน Build</div><a id="download" class="download hidden" href="#">DOWNLOAD APK</a></section>
+<section class="card"><h2>03 / BUILD LOGS</h2><pre id="logs">SONTEEN BUILD SYSTEM
+Waiting for source code...</pre></section>
+<div class="muted">Debug APK only · Source and APK files are stored in your configured Cloudflare R2 bucket.</div>
+<footer>SONTEEN AUTO APK BUILDER · MADE FOR ANDROID</footer>
+</main>
+<script>
+const $=s=>document.querySelector(s);let mode="project-zip",file=null,jobId=null,poll=null;
+const tabs=[...document.querySelectorAll(".tab")];
+function setMode(m){mode=m;tabs.forEach(t=>t.classList.toggle("active",t.dataset.mode===m));$("#picker").value="";file=null;$("#fileName").textContent="ยังไม่ได้เลือกไฟล์";$("#buildBtn").disabled=true;
+$("#picker").type=m==="project-zip"?"file":"file";
+$("#picker").removeAttribute("webkitdirectory");$("#picker").removeAttribute("multiple");
+if(m==="project-folder"||m==="src-folder"){$("#picker").setAttribute("webkitdirectory","");$("#picker").setAttribute("multiple","");}
+$("#picker").accept=m==="project-zip"?".zip":"";
+$("#dropTitle").textContent=m==="project-zip"?"เลือกไฟล์ ZIP":m==="project-folder"?"เลือกโฟลเดอร์โปรเจกต์":"เลือกโฟลเดอร์ src";
+$("#dropDesc").textContent=m==="project-zip"?"ไฟล์โปรเจกต์ Android .zip":m==="project-folder"?"โฟลเดอร์ที่มี settings.gradle และ app/":"เลือก app/src หรือ src ของแอป";
+$("#modeWarn").textContent=m==="src-folder"?"โหมด SRC จะใช้ Android template ขั้นพื้นฐาน โปรเจกต์ที่มี dependencies หรือ native code เพิ่มเติมอาจต้องปรับ Gradle เอง.": "ตรวจสอบให้ ZIP/โฟลเดอร์มีไฟล์ Gradle และ AndroidManifest.xml";
+}
+tabs.forEach(t=>t.addEventListener("click",()=>setMode(t.dataset.mode)));
+$("#picker").addEventListener("change",e=>{const fs=[...e.target.files];if(!fs.length)return;file=fs;$("#fileName").textContent=mode==="project-zip"?fs[0].name:`${fs.length} ไฟล์ · ${fs[0].webkitRelativePath.split("/")[0]}`;$("#buildBtn").disabled=false;});
+async function packageFiles(){if(mode==="project-zip")return file[0];const fd=new FormData();for(const f of file)fd.append("files",f,f.webkitRelativePath||f.name);
+ // Use JSZip to preserve directory structure for Cloud Build.
+ if(!window.JSZip)await new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";s.onload=ok;s.onerror=no;document.head.append(s)});
+ const zip=new JSZip();for(const f of file){const path=f.webkitRelativePath||f.name;zip.file(path,f);}
+ return await zip.generateAsync({type:"blob",compression:"DEFLATE"}).then(b=>new File([b],"sonteen-source.zip",{type:"application/zip"}));
+}
+function showStatus(s){$("#state").textContent=(s||"unknown").toUpperCase();$("#progress").style.width=s==="success"?"100%":s==="building"?"65%":s==="queued"?"20%":s==="error"?"100%":"0%";}
+async function refresh(){if(!jobId)return;try{const r=await fetch(`/api/jobs/${jobId}`);const d=await r.json();if(!r.ok)throw Error(d.error||"Cannot read job");showStatus(d.status);$("#jobInfo").textContent=`Job: ${d.id} · ${d.upload_name} · ${d.updated_at}`;$("#logs").textContent=d.log||d.error||"Waiting for runner logs...";if(d.status==="success"&&d.downloadUrl){$("#download").href=d.downloadUrl;$("#download").classList.remove("hidden");clearInterval(poll);$("#buildBtn").disabled=false;}else if(d.status==="error"){if(d.error)$("#logs").textContent+="\\n\\nERROR: "+d.error;clearInterval(poll);$("#buildBtn").disabled=false;}}catch(e){$("#logs").textContent="Status error: "+e.message;}}
+$("#buildBtn").addEventListener("click",async()=>{if(!file)return;$("#buildBtn").disabled=true;$("#download").classList.add("hidden");$("#logs").textContent="Preparing source archive...";showStatus("uploading");try{const packed=await packageFiles();const fd=new FormData();fd.append("file",packed,packed.name||"source.zip");fd.append("uploadType",mode);$("#logs").textContent="Uploading source to Cloudflare R2...";const r=await fetch("/api/upload",{method:"POST",body:fd});const d=await r.json();if(!r.ok)throw Error(d.error||"Upload failed");jobId=d.jobId;showStatus("queued");$("#jobInfo").textContent="Job: "+jobId;$("#logs").textContent="Source uploaded. Waiting for GitHub Actions Cloud Build runner...";await refresh();poll=setInterval(refresh,5000);}catch(e){showStatus("error");$("#logs").textContent="ERROR: "+e.message;$("#buildBtn").disabled=false;}});
+</script></body></html>
