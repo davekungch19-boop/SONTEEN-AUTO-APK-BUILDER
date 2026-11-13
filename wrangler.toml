@@ -9,10 +9,6 @@ GITHUB_WORKFLOW = "android-build.yml"
 GITHUB_REF = "main"
 MAX_UPLOAD_BYTES = "94371840"
 
-[[r2_buckets]]
-binding = "BUILDS"
-bucket_name = "sonteen-apk-builds"
-
 [[d1_databases]]
 binding = "DB"
 database_name = "sonteen-apk-jobs"
